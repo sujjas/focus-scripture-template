@@ -87,7 +87,10 @@
     z-index: 0;
     transform: rotate(var(--hl-rotate, 0deg)) scaleY(var(--hl-scaleY, 1));
     transform-origin: center center;
-    overflow: visible;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
   }
   .ref {
     position: relative;
@@ -343,9 +346,7 @@
   <div class="stage">
     <div class="card" id="card" style="--hl: #7dd3fc;">
       <div class="ref-wrap">
-        <svg class="ref-highlight" aria-hidden="true" viewBox="0 0 796.58 146.64" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-          <path id="hl-path" fill="#7dd3fc" d="M791.52,78.36c-16.71,.3-33.43,.59-50.14,.89,1.36-6.69,1.25-17.23-.25-23.98,5.38-.1,10.76-.19,16.14-.29,3.13-.06,6.57,.25,9.68-.17,.4-.06,.85-.01,1.26-.02,6.39-.11,5.94-36.8-.49-36.68-3.91,.07-7.83,.14-11.74,.21-.11-9.19-1.83-18.37-5.06-18.31-24.42,.43-48.84,.86-73.26,1.29-58.24,1.03-116.49,2.06-174.73,3.09-70.59,1.25-141.18,2.49-211.78,3.74-61,1.08-122,2.15-182.99,3.23-20.04,.35-40.08,.71-60.12,1.06-6.29,.11-12.59,.22-18.88,.33-3.13,.06-6.57-.25-9.68,.17-.4,.06-.85,.01-1.26,.02-6.39,.11-5.94,36.8,.49,36.68,3.91-.07,7.83-.14,11.74-.21,.05,4.27,.46,8.54,1.19,11.88-5.38,.1-10.76,.19-16.14,.29-3.13,.06-6.57-.25-9.68,.17-.4,.06-.85,.01-1.26,.02-6.39,.11-5.94,36.8,.49,36.68,16.71-.3,33.43-.59,50.14-.89-.68,3.37-1,7.72-.95,12.07-2.45,.04-4.9,.09-7.35,.13-3.13,.06-6.57-.25-9.68,.17-.4,.06-.85,.01-1.26,.02-6.39,.11-5.94,36.8,.49,36.68,24.42-.43,48.84-.86,73.26-1.29,58.24-1.03,116.49-2.06,174.73-3.09,70.59-1.25,141.18-2.49,211.78-3.74,61-1.08,122-2.15,182.99-3.23,20.04-.35,40.08-.71,60.12-1.06,6.29-.11,12.59-.22,18.88-.33,3.13-.06,6.57,.25,9.68-.17,.4-.06,.85-.01,1.26-.02,3.18-.06,4.67-9.2,4.56-18.34,2.45-.04,4.9-.09,7.35-.13,3.13-.06,6.57,.25,9.68-.17,.4-.06,.85-.01,1.26-.02,6.39-.11,5.94-36.8-.49-36.68Z"/>
-        </svg>
+        <img class="ref-highlight" id="hl-img" aria-hidden="true" src="" alt="">
         <div class="ref" contenteditable="true" spellcheck="false">Proverbs 4:23</div>
       </div>
       <div class="version" contenteditable="true" spellcheck="false">New International Version (NIV)</div>
@@ -459,6 +460,7 @@
   const swatchBox   = document.getElementById('swatches');
   const colorPicker = document.getElementById('color-picker');
   const hexInput    = document.getElementById('hex-input');
+  const hlImgEl     = document.getElementById('hl-img');
 
   const DEFAULTS = {
     ref:     'Proverbs 4:23',
@@ -475,6 +477,43 @@
     refSize: 57,
     verseSize: 61,
   };
+
+  // -- Pre-load highlight PNG for canvas recoloring --
+  const HL_PNG_SRC = 'data:image/png;base64,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';
+  const hlSrcImg = new Image();
+  const hlCanvas = document.createElement('canvas');
+  const hlCtx = hlCanvas.getContext('2d');
+  let hlReady = false;
+
+  hlSrcImg.onload = () => {
+    hlCanvas.width = hlSrcImg.naturalWidth;
+    hlCanvas.height = hlSrcImg.naturalHeight;
+    hlReady = true;
+    recolorHighlight(DEFAULTS.hl);
+  };
+  hlSrcImg.src = HL_PNG_SRC;
+
+  function recolorHighlight(hex) {
+    if (!hlReady) return;
+    hlCtx.clearRect(0, 0, hlCanvas.width, hlCanvas.height);
+    hlCtx.drawImage(hlSrcImg, 0, 0);
+    hlCtx.globalCompositeOperation = 'source-in';
+    hlCtx.fillStyle = hex;
+    hlCtx.fillRect(0, 0, hlCanvas.width, hlCanvas.height);
+    hlCtx.globalCompositeOperation = 'source-over';
+    hlImgEl.src = hlCanvas.toDataURL('image/png');
+  }
+
+  // -- Pre-load kraft background as data URL for html2canvas --
+  const bgImg = new Image();
+  bgImg.onload = () => {
+    const c = document.createElement('canvas');
+    c.width = bgImg.naturalWidth;
+    c.height = bgImg.naturalHeight;
+    c.getContext('2d').drawImage(bgImg, 0, 0);
+    card.style.backgroundImage = "url('" + c.toDataURL('image/jpeg', 0.92) + "')";
+  };
+  bgImg.src = 'assets/kraft-bg.png';
 
   // Two-way binding: sidebar inputs <-> card contenteditable
   function bind(input, el) {
@@ -496,7 +535,7 @@
 
   // Highlight color
   function setHighlight(hex) {
-    card.style.setProperty('--hl', hex);
+    recolorHighlight(hex);
     colorPicker.value = hex;
     hexInput.value = hex.toUpperCase();
     [...swatchBox.children].forEach(s => {
